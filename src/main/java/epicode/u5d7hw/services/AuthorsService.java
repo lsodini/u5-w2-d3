@@ -3,7 +3,7 @@ package epicode.u5d7hw.services;
 import epicode.u5d7hw.entities.Author;
 import epicode.u5d7hw.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
-
+import lombok.*;
 import java.util.*;
 
 @Service
@@ -14,7 +14,7 @@ public class AuthorsService {
     public Author save(Author author) {
         Random rndm = new Random();
         author.setId(rndm.nextInt());
-        author.setAvatar("https://ui-avatars.com/api/?name="+ author.getName() + "+" + author.getSurname());
+        author.setAvatar("https://ui-avatars.com/api/?name=" + author.getName() + "+" + author.getSurname());
         this.authors.add(author);
         return author;
     }
@@ -27,8 +27,10 @@ public class AuthorsService {
         Author found = null;
 
         for (Author author : authors) {
-            if (author.getId() == id)
+            if (author.getId() == id) {
                 found = author;
+                break; // Esci dal ciclo non appena trovi l'autore
+            }
         }
         if (found == null)
             throw new NotFoundException(id);
@@ -42,24 +44,19 @@ public class AuthorsService {
             Author currentAuthor = iterator.next();
             if (currentAuthor.getId() == id) {
                 iterator.remove();
+                return; // Esci dal metodo dopo la cancellazione
             }
         }
+        throw new NotFoundException(id); // Se l'autore non è trovato
     }
 
     public Author findByIdAndUpdate(int id, Author author) {
-        Author found = null;
+        Author found = findById(id); // Usa il metodo findById
 
-        for (Author currentAuthor : authors) {
-            if (currentAuthor.getId() == id) {
-                found = currentAuthor;
-                found.setName(author.getName());
-                found.setSurname(author.getSurname());
-                found.setId(id);
-            }
-        }
-        if (found == null)
-            throw new NotFoundException(id);
+        found.setName(author.getName());
+        found.setSurname(author.getSurname());
+        found.setAvatar(author.getAvatar()); // Se hai anche l'avatar da aggiornare
+
         return found;
-
     }
 }
